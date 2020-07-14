@@ -9,6 +9,7 @@ ApiTools是一个集成各种开放Api的web项目，为大家提供免费的、
 ```bash
 开发语言: go 1.13
 web框架: gin 
+关系型数据库: mysql 5.7
 nosql数据库: redis 5.x
 ```
 
