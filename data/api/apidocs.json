@@ -1,0 +1,122 @@
+{
+  "whoisquery": {
+    "docFile": "whoisquery.md",
+    "countKey": "whoisquery",
+    "description": "查询域名whois信息",
+    "titleName": "域名Whois查询",
+    "enable": true,
+    "mainten": false
+  },
+  "toshorturl": {
+    "docFile": "toshorturl.md",
+    "countKey": "toshorturl",
+    "description": "长链接转换为自定义短链接",
+    "titleName": "自定义生成短链接",
+    "enable": true,
+    "mainten": false
+  },
+  "parseshorturl": {
+    "docFile": "parseshorturl.md",
+    "countKey": "parseshorturl",
+    "description": "自定义短链链接解析为长链接",
+    "titleName": "自定义短链接还原",
+    "enable": true,
+    "mainten": false
+  },
+  "tooffshorturl": {
+    "docFile": "tooffshorturl.md",
+    "countKey": "tooffshorturl",
+    "description": "长链接转换为(t.cn/url.cn)等短链接",
+    "titleName": "短链接生成",
+    "enable": true,
+    "mainten": false
+  },
+  "parseoffshorturl": {
+    "docFile": "parseoffshorturl.md",
+    "countKey": "parseoffshorturl",
+    "description": "短链接(t.cn/url.cn)解析为长链接",
+    "titleName": "短链接解析",
+    "enable": true,
+    "mainten": false
+  },
+  "ipv4query": {
+    "docFile": "ipv4query.md",
+    "countKey": "ipv4query",
+    "description": "获取指定ipv4地址信息",
+    "titleName": "ipv4信息查询",
+    "enable": true,
+    "mainten": false
+  },
+  "proxypool": {
+    "docFile": "proxypool.md",
+    "countKey": "proxypool",
+    "description": "全球免费代理IP库，高可用IP，精心筛选优质IP",
+    "titleName": "全球免费代理IP库",
+    "enable": true,
+    "mainten": false
+  },
+  "bankcard": {
+    "docFile": "bankcard.md",
+    "countKey": "bankcard",
+    "description": "获取银行卡信息，发卡行、卡类型",
+    "titleName": "银行卡信息查询",
+    "enable": true,
+    "mainten": false
+  },
+  "icpquery": {
+    "docFile": "icpquery.md",
+    "countKey": "icpquery",
+    "description": "查询域名ICP备案信息",
+    "titleName": "ICP备案信息查询",
+    "enable": true,
+    "mainten": false
+  },
+  "telquery": {
+    "docFile": "telquery.md",
+    "countKey": "telquery",
+    "description": "查询手机号归属地和号段信息",
+    "titleName": "查询手机号信息",
+    "enable": true,
+    "mainten": false
+  },
+  "text_to_audio": {
+    "docFile": "text_to_audio.md",
+    "countKey": "text_to_audio",
+    "description": "将文字转换为语音",
+    "titleName": "文字转语音",
+    "enable": true,
+    "mainten": false
+  },
+  "qqinfo": {
+    "docFile": "qqinfo.md",
+    "countKey": "qqinfo",
+    "description": "获取qq用户的头像和昵称信息",
+    "titleName": "QQ信息获取",
+    "enable": true,
+    "mainten": false
+  },
+  "dcheck": {
+    "docFile": "dcheck.md",
+    "countKey": "dcheck",
+    "description": "检测域名在微信QQ是否报红",
+    "titleName": "域名报红检测",
+    "enable": true,
+    "mainten": false
+  },
+  "segcut": {
+    "docFile": "segcut.md",
+    "countKey": "segcut",
+    "description": "将一整段文字拆解成多个的词语",
+    "titleName": "中文分词",
+    "enable": true,
+    "mainten": false
+  },
+  "svp": {
+    "docFile": "short_video_parse.md",
+    "countKey": "shortVideoParse",
+    "description": "短视频去水印(抖音/快手/更多...)",
+    "titleName": "短视频解析",
+    "enable": true,
+    "mainten": false
+  }
+}

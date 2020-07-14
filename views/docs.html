@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    {{template "modle/keywords.html"}}
+    <link rel="shortcut icon" href="/static/imgs/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/static/libs/layui/css/layui.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <script src="/static/libs/layui/layui.js"></script>
+    <script src="/static/js/main.js"></script>
+    <title>ApiTools</title>
+    {{template "modle/tongji.html"}}
+</head>
+<body style="background-color: #FFFFFF;">
+{{template "modle/header"}}
+<div id="container">
+    <div id="docs">
+        <div class="api_name" style="margin-top: 7%;">
+            <fieldset class="layui-elem-field layui-field-title">
+                <legend>{{.ApiName}}{{if .Mainten}}&nbsp;(接口维护中){{end}}</legend>
+            </fieldset>
+        </div>
+        <div class="api_desc">
+            <blockquote class="layui-elem-quote" style="border-left: 5px solid #01AAED;">{{.Description}}</blockquote>
+        </div>
+        <div class="api_table">
+            <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief" style="text-align: center !important;">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">Api文档</li>
+                    <li>错误码参照</li>
+                    <li>示例代码</li>
+                </ul>
+                <div class="layui-tab-content" style="text-align: left !important;">
+                    <!-- Api文档 -->
+                    <div class="layui-tab-item layui-show line-row">
+                        <div class="simple-line">
+                            <span class="layui-badge layui-bg-cyan">接口地址: </span>
+                            <span class="line_text">{{.ApiAddr}}</span>
+                        </div>
+                        <div class="simple-line">
+                            <span class="layui-badge layui-bg-green">返回格式: </span>
+                            <span class="line_text">{{.RsponseType}}</span>
+                        </div>
+                        <div class="simple-line">
+                            <span class="layui-badge">请求方式: </span>
+                            <span class="line_text">{{.RequestMethod}}</span>
+                        </div>
+                        <div class="linep">
+                            请求示例:
+                        </div>
+                        <div class="api-code">
+                            <pre class="layui-code" lay-title="text">{{.RequestDemo}}</pre>
+                        </div>
+                        <div class="linep">
+                            请求参数说明:
+                        </div>
+                        <div class="api-table">
+                            <table class="layui-table" lay-size="sm">
+                                <colgroup>
+                                    <col width="200">
+                                    <col width="200">
+                                    <col>
+                                </colgroup>
+                                <thead>
+                                <tr>
+                                    <th>字段名称</th>
+                                    <th>类型</th>
+                                    <th>必填</th>
+                                    <th>说明</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {{range .ReqParam}}
+                                    <tr>
+                                        {{range $index, $v := .}}
+                                            <td>{{$v}}</td>
+                                        {{end}}
+                                    </tr>
+                                {{end}}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="linep">
+                            返回示例:
+                        </div>
+                        <div class="api-code">
+                            <pre class="layui-code" lay-title="json">{{.ReponseDemo}}</pre>
+                        </div>
+                        <div class="linep">
+                            返回参数说明:
+                        </div>
+                        <div class="api-table">
+                            <table class="layui-table" lay-size="sm">
+                                <colgroup>
+                                    <col width="200">
+                                    <col width="200">
+                                    <col>
+                                </colgroup>
+                                <thead>
+                                <tr>
+                                    <th>字段名称</th>
+                                    <th>类型</th>
+                                    <th>说明</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {{range .RepParam}}
+                                    <tr>
+                                        {{range $index, $v := .}}
+                                            <td>{{$v}}</td>
+                                        {{end}}
+                                    </tr>
+                                {{end}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- 错误码参照 -->
+                    <div class="layui-tab-item line-row">
+                        <div class="linep">
+                            错误码格式说明:
+                        </div>
+                        <div class="api-table">
+                            <table class="layui-table" lay-size="sm">
+                                <colgroup>
+                                    <col width="200">
+                                    <col width="200">
+                                    <col>
+                                </colgroup>
+                                <thead>
+                                <tr>
+                                    <th>字段名称</th>
+                                    <th>类型</th>
+                                    <th>说明</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {{range .ErrParam}}
+                                    <tr>
+                                        {{range $index, $v := .}}
+                                            <td>{{$v}}</td>
+                                        {{end}}
+                                    </tr>
+                                {{end}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- 示例代码 -->
+                    <div class="layui-tab-item line-row">
+                        <div class="linep">
+                            示例代码:
+                        </div>
+                        <div class="api-code">
+                            <pre class="layui-code" lay-title="text">{{.DemoCode}}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            layui.use('code', function () { //加载code模块
+                layui.code(); //引用code方法
+            });
+        </script>
+    </div>
+</div>
+</body>
+</html>

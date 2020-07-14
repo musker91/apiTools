@@ -1,0 +1,26 @@
+{
+  "t.cn": [
+    {
+      "url": "http://shorturl.8446666.sojson.com/sina/shorturl?url=<%url%>",
+      "key": "shorturl",
+      "status": "status<>200"
+    },
+    {
+      "url": "https://api.oioweb.cn/api/dwz.php?type=1&url=<%url%>",
+      "key": "url<>url_short",
+      "status": "code<>1"
+    }
+  ],
+  "url.cn": [
+    {
+      "url": "http://shorturl.8446666.sojson.com/qq/shorturl?url=<%url%>",
+      "key": "shorturl",
+      "status": "status<>200"
+    },
+    {
+      "url": "https://api.oioweb.cn/api/dwz.php?type=2&url=<%url%>",
+      "key": "url<>url_short",
+      "status": "code<>1"
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    {{template "modle/keywords.html"}}
+    <link rel="shortcut icon" href="/static/imgs/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/static/libs/layui/css/layui.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <script src="/static/libs/layui/layui.js"></script>
+    <script src="/static/js/main.js"></script>
+    <title>ApiTools</title>
+    {{template "modle/tongji.html"}}
+</head>
+<body>
+{{template "modle/header"}}
+<div id="container">
+    <div id="index">
+        <div class="panel layui-bg-blue">
+            <h1>ApiTools</h1>
+            <p>稳定、快速、免费、开源的 API 接口服务</p>
+            <p>目前共收录了 {{.ApiCount}} 个接口</p>
+        </div>
+        <div class="apiList">
+            <section class="">
+                <p class="explain">拒绝流量劫持，全面使用 HTTPS！</p>
+                <div class="layui-row layui-col-space12">
+                    {{range .ApiList}}
+                        <div class="layui-col-md4 drow layui-anim-upbit">
+                            <a href="/docs/{{.ApiUrl}}">
+                                {{ if .Mainten }}
+                                    <div class="drow-right layui-bg-orange">
+                                        &nbsp;维护中&nbsp;
+                                    </div>
+                                {{else}}
+                                    <div class="drow-right layui-bg-blue">
+                                        调用: {{.RequestCountShow}} 次
+                                    </div>
+                                {{end}}
+                                <div class="drow-left">
+                                    <p class="drow-title">{{.TitleName}}</p>
+                                    <p class="drow-desc">{{.Description}}</p>
+                                </div>
+                            </a>
+                        </div>
+                    {{end}}
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{{template "modle/footer" .}}
+</body>
+</html>

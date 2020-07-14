@@ -1,0 +1,14 @@
+{
+  "all": [
+    {
+      "url": "http://shorturl.8446666.sojson.com/parse/shorturl?url=<%url%>",
+      "key": "longurl",
+      "status": "status<>200"
+    },
+    {
+      "url": "https://api.oioweb.cn/api/dwzreduction.php?url=<%url%>",
+      "key": "url<>url_long",
+      "status": "code<>1"
+    }
+  ]
+}

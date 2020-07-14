@@ -1,0 +1,17 @@
+.DS_Store
+/tmp
+/temp
+/logs/*
+/dist/
+
+# tmp file
+Test*
+
+# dev file
+run_apiTools
+apiTools
+dist.zip
+
+# Editor directories and files
+.idea
+.vscode

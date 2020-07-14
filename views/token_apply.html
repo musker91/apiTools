@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    {{template "modle/keywords.html"}}
+    <link rel="shortcut icon" href="/static/imgs/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/static/libs/layui/css/layui.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <script src="/static/libs/layui/layui.js"></script>
+    <script src="/static/js/main.js"></script>
+    <title>关于ApiTools</title>
+    {{template "modle/tongji.html"}}
+</head>
+<body style="background-color: #FFFFFF;">
+{{template "modle/header"}}
+<div id="container">
+    <div id="visitappli">
+        <blockquote class="layui-elem-quote">
+            <h3>ApiTools白名单申请，解除访问限制</h3>
+        </blockquote>
+
+        <div class="formbox">
+            <div class="linep">
+                所有api接口均为免费，如果您的调用量特别大可以进行申请白名单的，如果在没有申请白名单的情况下可以正常调用即可不用申请白名单
+            </div>
+            <div class="linep">
+                为防止免费Api接口恶意调用，申请Api白名单需要管理员审核后发放解除限制Token，申请后请添加作者QQ(1152490990)进行获取
+            </div>
+            <form class="layui-form" action="">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">联系QQ: </label>
+                    <div class="layui-input-block">
+                        <input type="text" name="qq" required lay-verify="required" placeholder="请输入您的QQ号"
+                               autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">日调用量: </label>
+                    <div class="layui-input-block">
+                        <input type="text" name="msg" required lay-verify="required" placeholder="请输入您大约日调用量"
+                               autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit="" lay-filter="formSubmit">提交申请</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+
+            <script>
+                layui.use('form', function () {
+                    var form = layui.form;
+                    $ = layui.jquery;
+                    //监听提交
+                    form.on('submit(formSubmit)', function (fdata) {
+                        $.ajax({
+                            type: "POST",
+                            url: "/visitappli",
+                            dataType: "json",
+                            data: fdata.field,
+                            success: function (data) {
+                                layer.msg("申请提交成功，请添加站长QQ: 1152490990");
+                            },
+                            error: function (data) {
+                                layer.msg("申请提交失败，请稍后重试");
+                            }
+                        });
+                        return false;
+                    });
+                });
+            </script>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <div class="linep">
+                维护不易，您在支持就是我不断更新的动力
+            </div>
+
+            <div class="wxzs">
+                <img src="/static/imgs/zs.jpeg" alt="维护不易，您在支持就是我不断更新的动力">
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

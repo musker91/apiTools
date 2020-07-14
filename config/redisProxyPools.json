@@ -1,0 +1,10 @@
+[
+  {
+    "keyName": "standardProxypool",
+    "checkUrl": "www.baidu.com"
+  },
+  {
+    "keyName": "chinazProxyPool",
+    "checkUrl": "api.chinaz.com"
+  }
+]

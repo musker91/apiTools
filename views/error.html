@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    {{template "modle/keywords.html"}}
+    <link rel="shortcut icon" href="/static/imgs/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/static/libs/layui/css/layui.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <script src="/static/libs/layui/layui.js"></script>
+    <script src="/static/js/main.js"></script>
+    <title>ApiTools</title>
+    {{template "modle/tongji.html"}}
+</head>
+<body>
+{{template "modle/header"}}
+<div id="container">
+    <div id="error">
+        <h1>
+            <i class="layui-icon layui-icon-face-cry" style="font-size: 100px; color: #e91e63;"></i>
+        </h1>
+        <h2>
+            <span style="color: #686D8F;font: 70px bold;">{{.errorCode}}</span>
+            <span style="color: #DA694D;font: 50px bold;">{{.errorMsg}}</span>
+        </h2>
+    </div>
+</div>
+</body>
+</html>

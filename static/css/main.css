@@ -1,0 +1,280 @@
+/* main */
+body {
+    background-color: #F5F5F5;
+}
+
+/* header */
+#header {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 99999;
+}
+
+#header .layui-logo {
+    line-height: 60px;
+    text-align: center;
+    width: 30px;
+    margin-left: 1.6%;
+}
+
+#header .layui-logo img {
+    width: 35px;
+    height: 35px;
+}
+
+/* container */
+#container {
+    margin-bottom: 6%;
+    margin-top: 60px;
+}
+
+/* index */
+#index {
+}
+
+#index .panel {
+    text-align: center;
+    padding-bottom: 20px;
+}
+
+#index .panel h1 {
+    font-size: 36px;
+    font-weight: 900;
+    text-shadow: -5px 5px 0 rgba(0, 0, 0, .1);
+    margin-bottom: 6px;
+}
+
+#index .panel p {
+    margin-bottom: 3px;
+    margin-top: 5px;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+#index .apiList {
+    margin: 0 6%;
+}
+
+#index .apiList .explain {
+    text-align: right;
+    font-size: 16px;
+    margin: 12px 6px;
+}
+
+#index .apiList .layui-col-md4 {
+    margin: 10px 12px;
+    padding: 16px 22px;
+    text-align: center;
+    width: 31%;
+}
+
+@media screen and (max-width: 1150px) {
+    #index .apiList .layui-col-md4 {
+        margin: 10px 0;
+        padding: 16px 0;
+        text-align: center;
+        width: 100%;
+    }
+
+    #about {
+        margin: 24% 6% !important;
+    }
+
+    #about .wxzs img {
+        width: 60%;
+    }
+
+    #docs {
+        margin: 20% 6% !important;
+    }
+}
+
+#index .apiList .drow {
+    background-color: #FFFFFF;
+    border-radius: 5px;
+    position: relative;
+    height: 100px;
+}
+
+#index .apiList .drow:hover {
+    background-color: #F0F0F0;
+    box-shadow: 3px 3px 0 #eeeeee;
+}
+
+#index .apiList .drow .drow-left {
+    position: absolute;
+    left: 33px;
+    top: 26px;
+    text-align: left;
+}
+
+#index .apiList .drow .drow-right {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 36px;
+    line-height: 36px;
+    padding: 0 24px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 0 6px 0 8px;
+}
+
+#index .apiList .drow .drow-title {
+    color: #646464;
+    font-size: 20px;
+}
+
+#index .apiList .drow .drow-desc {
+    color: #646464;
+    font-size: 14px;
+    margin-top: 7px;
+}
+
+/* docs */
+#docs {
+    margin: 10px 6%;
+}
+
+#docs .layui-this {
+    color: #01AAED;
+}
+
+#docs .layui-this:after {
+    border-bottom: 2px solid #01AAED;
+}
+
+#docs .line-row .simple-line {
+    margin: 12px 0;
+}
+
+#docs .line-row .linep {
+    font-size: 14px;
+    font-weight: 700;
+    color: #555;
+    padding-left: 14px;
+    height: 16px;
+    line-height: 16px;
+    margin-bottom: 18px;
+    position: relative;
+    margin-top: 15px;
+}
+
+#docs .line-row .linep:before {
+    content: '';
+    width: 4px;
+    height: 16px;
+    background: #00aeff;
+    border-radius: 2px;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+#docs .line_text {
+    word-break: break-all;
+    cursor: pointer;
+    margin-left: 5px;
+    color: #777;
+    border: none;
+    border-radius: 0;
+    border-bottom: 2px solid #01AAED;
+}
+
+/* about */
+
+#about {
+    margin: 6%;
+}
+
+.linep {
+    font-size: 14px;
+    font-weight: 700;
+    color: #555;
+    padding-left: 14px;
+    height: 16px;
+    line-height: 16px;
+    margin-bottom: 18px;
+    position: relative;
+    margin-top: 15px;
+}
+
+.linep:before {
+    content: '';
+    width: 4px;
+    height: 16px;
+    background: #00aeff;
+    border-radius: 2px;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+#about .simple-line {
+    margin: 12px 0;
+}
+
+#about .line_text {
+    word-break: break-all;
+    cursor: pointer;
+    margin-left: 5px;
+    color: #777;
+    border: none;
+    border-radius: 0;
+    border-bottom: 2px solid #01AAED;
+}
+
+.wxzs img{
+    width: 24%;
+}
+
+/* error */
+#error {
+    text-align: center;
+    margin-top: 10%;
+    font: 22px bold;
+    color: #393D49;
+}
+
+/* footer */
+#footer {
+    margin-top: 100px;
+}
+
+#footer .layui-footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 8px 15px;
+    text-align: center;
+    background-color: #eee;
+    color: #393D49;
+    z-index: 99999;
+}
+
+#footer .layui-footer p {
+    margin: 0;
+    padding: 0;
+    color: #FFFFFF;
+}
+
+#footer .layui-footer a {
+    color: #FFFFFF;
+}
+
+#footer .layui-footer a:hover {
+    color: #eee;
+}
+
+/* visitappli */
+
+#visitappli {
+    margin: 6%;
+}
+
+#visitappli .formbox {
+    margin-top: 3%;
+}
