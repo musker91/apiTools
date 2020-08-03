@@ -10,7 +10,7 @@ import (
 var helpString = `user token manage tools
 
 add 		Add user token, if exists update.
-del			Delete user token.
+del		Delete user token.
 flush		Flush user token to cache.
 help 		Get user token manage tools help info.
 exit 		Exit apiTools token app.
