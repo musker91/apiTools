@@ -27,7 +27,7 @@ func ICPQueryInfo(c *gin.Context) {
 			"routers": c.Request.URL.Path,
 			"err":     err,
 			"query":   requestForm,
-		}).Error("query bank card info fail")
+		}).Error("query domain icp info fail")
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "", "data": result})
