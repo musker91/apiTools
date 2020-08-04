@@ -19,7 +19,7 @@ const (
 
 // 请求表单
 type ICPForm struct {
-	Url string `form:"url" xml:"url" json:"xml" binding:"required"`
+	Url string `form:"url" xml:"url" json:"url" binding:"required"`
 }
 
 // 返回表单
