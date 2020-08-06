@@ -4,6 +4,7 @@ all: build
 
 build:
 	@go build -v .
+	@bash ./build.sh
 	@echo "build success"
 
 tool:
@@ -16,6 +17,7 @@ lint:
 clean:
 	@rm -rf apiTools
 	@go clean -i .
+	@rm -rf ./dist ./dist.zip
 
 help:
 	@echo "make: compile packages and dependencies"
