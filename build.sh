@@ -7,13 +7,6 @@ fi
 
 mkdir ./dist
 
-# go build linux amd64
-GOOS=linux GOARCH=amd64 go build -o apiTools main.go
-if [[ $? != 0 ]];then
-    echo "go build fail!!!"
-    exit
-fi
-
 # mv data file and directory
 mv apiTools     ./dist/
 cp -rf config   ./dist/

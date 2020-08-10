@@ -4,8 +4,12 @@ all: build
 
 build:
 	@go build -v .
-	@bash ./build.sh
 	@echo "build success"
+
+pack:
+	@go build -v .
+	@bash ./build.sh
+	@echo "packaged successfully"
 
 tool:
 	@go vet .
