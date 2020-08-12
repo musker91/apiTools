@@ -2,69 +2,81 @@ package config
 
 import (
 	"apiTools/utils"
-	"encoding/json"
-	"errors"
 	"fmt"
-	"github.com/go-ego/gse"
 	"gopkg.in/ini.v1"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 )
 
-// 项目配置信息
-type appConfig struct {
-	serverConfig `conf:"web"`
-	redisConfig  `conf:"redis"`
-	mysqlConfig  `conf:"mysql"`
-	proxyPoolApp `conf:"proxyPoolApp"`
-	emailConfig  `conf:"email"`
+/*
+config struct tag说明:
+ini: 配置文件中名称，默认空则同名
+conf: 调用配置默认名称，否则以struct字段名第一个字母小写为准
+default: 配置默认值, 单字符串表示直接设置值，func:xxx表示调用函数设置值
+env: 优先读取环境变量中的值，默认读取struct字段名全大写值
+func: 调用获取值时返回的类型
+none: 标记字段为none时的值，后续扫描会判断
+panic: 当这个值为空时 panic错误消息提示
+*/
+
+// app configure
+type AppConfigInfo struct {
+	Service *serviceInfo `ini:"web" conf:"web"`
+	Redis   *redisInfo   `ini:"redis"`
+	Mysql   *mysqlInfo   `ini:"mysql"`
+	Email   *emailInfo   `ini:"email"`
 }
 
+// config file //
+
 // 服务配置信息
-type serverConfig struct {
-	Port                  string    `conf:"port"`                  // http监听端口
-	AppMode               string    `conf:"appMode"`               // app运行模式: production, development
-	EnablePprof           bool      `conf:"enablePprof"`           // 是否开启pprof
-	LogLevel              string    `conf:"logLevel"`              // 日志级别: debug, info, error, warn, panic
-	LogSaveDay            uint      `conf:"logSaveDay"`            // 日志文件保留天数
-	LogSplitTime          uint      `conf:"logSplitTime"`          // 日志切割时间间隔
-	LogOutType            string    `conf:"logOutType"`            // 日志输入类型, json, text
-	LogOutPath            string    `conf:"logOutPath"`            // 文件输出位置, file console
-	StartTime             time.Time `conf:"startTime"`             // 系统开始运行时间
-	EnableIpLimiting      bool      `conf:"enableIpLimiting"`      // 是否开启ip限流
-	IpLimitingTimeSeconds uint      `conf:"ipLimitingTimeSeconds"` // IP限流时间段(单位: 秒)
-	IpLimitingCount       uint      `conf:"ipLimitingCount"`       // IP限流时间段内请求不能超过的次数
-	LiftIpLimiting        uint      `conf:"liftIpLimiting"`        // 解除ip限流的时间(单位: 秒)
+type serviceInfo struct {
+	Port                  int    `default:"8091"`
+	AppMode               string `default:"development"`
+	EnablePprof           bool
+	LogLevel              string `default:"info"`
+	LogSaveDay            int    `default:"7"`
+	LogSplitTime          int    `default:"24"`
+	LogOutType            string `default:"json"`
+	LogOutPath            string `default:""`
+	StartTime             string `default:"func:startTime"`
+	EnableIpLimiting      bool
+	IpLimitingTimeSeconds int `default:"10"`
+	IpLimitingCount       int `default:"8"`
+	LiftIpLimiting        int `default:"5"`
 }
 
 // redis 配置信息
-type redisConfig struct {
-	Host     string `conf:"host"`     // redis连接地址
-	Port     string `conf:"port"`     // redis连接端口
-	Password string `conf:"password"` // redis连接密码
+type redisInfo struct {
+	Host     string
+	Port     int64 `default:"3306"`
+	Password string
 }
 
 // mysql 配置信息
-type mysqlConfig struct {
-	Host        string `conf:"host"`        // mysql连接地址
-	Port        string `conf:"port"`        // mysql连接端口
-	User        string `conf:"user"`        // mysql用户名
-	Password    string `conf:"password"`    // mysql连接密码
-	DB          string `conf:"db"`          // mysql 数据库名称
-	EnableDebug bool   `conf:"enableDebug"` // 是否开启sql调试模式
+type mysqlInfo struct {
+	Host        string
+	Port        int `default:"3306"`
+	User        string
+	Password    string
+	DB          string
+	EnableDebug bool
 }
 
 // email 配置
-type emailConfig struct {
-	RecvMail       []string `conf:"recvMail"`
-	SmtpHost       string   `conf:"smtpHost"`
-	SmtpPort       int      `conf:"smtpPort"`
-	SenderMail     string   `conf:"senderMail"`
-	SenderAuthCode string   `conf:"senderAuthCode"`
+type emailInfo struct {
+	RecverMail     []string
+	SmtpHost       string
+	SmtpPort       int
+	SenderMail     string
+	SenderAuthCode string
 }
+
+// other config //
 
 // 代理池在redis中存储结构
 type RedisProxyPool struct {
@@ -78,236 +90,135 @@ type proxyPoolApp struct {
 }
 
 var (
-	appConf appConfig
-	Seg     gse.Segmenter // 分词
+	AppConfig *AppConfigInfo
+	//Seg       gse.Segmenter // 分词
+
+	defaultCallBack confCallBack
 )
 
-// ----------- 初始化配置 ----------- //
-// 初始化配置
 func InitConfig() (err error) {
+	AppConfig = &AppConfigInfo{}
 	// 获取配置文件
 	configPath := filepath.Join(utils.GetRootPath(), "config", "apitools.ini")
 	iniFile, err := ini.Load(configPath)
 	if err != nil {
 		return
 	}
-	// 读取web server配置
-	err = readServerConfig(iniFile)
+	err = iniFile.MapTo(AppConfig)
 	if err != nil {
 		return
 	}
-	// 读取redis配置
-	err = readRedisConfig(iniFile)
-	if err != nil {
-		return
-	}
+	// 配置文件扫描从新配置
+	scanConfig(AppConfig)
 
-	// 读取mysql配置
-	err = readMysqlConfig(iniFile)
-	if err != nil {
-		return
-	}
-
-	// 读取email配置
-	err = readEmailConfig(iniFile)
-	if err != nil {
-		return
-	}
-
-	// 读取proxy app 配置
-	err = readProxyAppConfig(iniFile)
-	if err != nil {
-		return
-	}
 	// 初始化分词功能, 加载默认字典
-	_ = Seg.LoadDict()
+	//_ = Seg.LoadDict()
 	return
 }
 
-// 读取web server配置
-func readServerConfig(iniFile *ini.File) (err error) {
-	serverConf := iniFile.Section("web")
+type confCallBack struct{}
 
-	httpPort := serverConf.Key("http_port").String()
-	if httpPort == "" {
-		httpPort = "8091"
+func (*confCallBack) startTime(value string) time.Time {
+	if value == "" {
+
 	}
-	appConf.serverConfig.Port = httpPort
+	parse, _ := time.Parse("2006/01/02", value)
+	return parse
+}
 
-	runMode := serverConf.Key("app_mode").String()
-	if runMode == "" {
-		runMode = "development"
+func setConfigValue(fieldType *reflect.StructField, fieldVal *reflect.Value, value interface{}) {
+	confValue := value.(string)
+	switch fieldType.Type.Kind() {
+	case reflect.String:
+		fieldVal.SetString(confValue)
+	case reflect.Int:
+		v, _ := strconv.Atoi(confValue)
+		fieldVal.SetInt(int64(v))
 	}
-	appConf.serverConfig.AppMode = runMode
+}
 
-	enablePprof, err := serverConf.Key("enable_pprof").Bool()
-	if err != nil {
-		enablePprof = false
+func updateConfigValue(fieldType *reflect.StructField, fieldVal *reflect.Value) {
+	name := fieldType.Name
+	value := fieldVal.Interface()
+	// env name
+	envName := fieldType.Tag.Get("env")
+	if envName == "" {
+		envName = strings.ToUpper(name)
 	}
-	appConf.serverConfig.EnablePprof = enablePprof
-
-	logLevel := serverConf.Key("logLevel").String()
-	if logLevel == "" && runMode == "development" {
-		logLevel = "debug"
-	} else {
-		logLevel = "info"
+	// default value
+	defaultType := "" // "","func"
+	defaultValue := fieldType.Tag.Get("default")
+	if strings.HasPrefix(defaultValue, "func:") {
+		defaultType = "func"
+		defaultValue = strings.Split(defaultValue, "func:")[1]
 	}
-	appConf.serverConfig.LogLevel = logLevel
-
-	logSaveDay, err := serverConf.Key("logSaveDay").Uint()
-	if err != nil {
-		logSaveDay = 7
+	// none value
+	noneValue := fieldType.Tag.Get("none")
+	if noneValue == "" {
+		switch fieldType.Type.Kind() {
+		case reflect.Int, reflect.Int64, reflect.Uint, reflect.Uint64:
+			noneValue = "0"
+		case reflect.Bool:
+			noneValue = "false"
+		}
 	}
-	appConf.serverConfig.LogSaveDay = logSaveDay
 
-	logSplitTime, err := serverConf.Key("logSplitTime").Uint()
-	if err != nil {
-		logSplitTime = 24
+	// 优先级  env, source, default, none
+	envValue := os.Getenv(envName)
+	if envValue != "-" {
+		if envValue != "" {
+			setConfigValue(fieldType, fieldVal, envValue)
+			return
+		}
 	}
-	appConf.serverConfig.LogSplitTime = logSplitTime
-
-	logOutType := serverConf.Key("LogOutType").String()
-	if logOutType == "" {
-		logOutType = "json"
+	newVal := fmt.Sprintf("%v", value)
+	if newVal != strings.TrimSpace(noneValue) {
+		return
 	}
-	appConf.serverConfig.LogOutType = logOutType
 
-	logOutPath := serverConf.Key("logOutPath").String()
-	if logOutPath == "" {
-		logOutPath = "file"
-	}
-	appConf.serverConfig.LogOutPath = logOutPath
-
-	startTime := serverConf.Key("startTime").String()
-	if startTime == "" {
-		appConf.serverConfig.StartTime = time.Now()
-	} else {
-		runTime, err := time.Parse("2006/01/02", startTime)
-		if err != nil {
-			appConf.serverConfig.StartTime = time.Now()
+	if defaultValue != "" {
+		if defaultType == "func" {
+			callBack := reflect.ValueOf(defaultCallBack)
+			callFunc := callBack.MethodByName(defaultValue)
+			callValue := callFunc.Call([]reflect.Value{})[0].Interface()
+			setConfigValue(fieldType, fieldVal, callValue)
 		} else {
-			appConf.serverConfig.StartTime = runTime
+			setConfigValue(fieldType, fieldVal, defaultValue)
 		}
 	}
+	// error panic
+	panicValue := fieldType.Tag.Get("panic")
+	if panicValue != "" {
+		if fieldVal.String() == "" && defaultValue == "" && envValue == "" {
 
-	// ip限流
-	enableIpLimiting, err := serverConf.Key("enableIpLimiting").Bool()
-	if err != nil {
-		enableIpLimiting = false
-	}
-	appConf.serverConfig.EnableIpLimiting = enableIpLimiting
-	if enableIpLimiting {
-		ipLimitingTimeSeconds, err := serverConf.Key("ipLimitingTimeSeconds").Uint()
-		if err != nil || ipLimitingTimeSeconds == 0 {
-			ipLimitingTimeSeconds = 10
+			panic(panicValue)
 		}
-		appConf.serverConfig.IpLimitingTimeSeconds = ipLimitingTimeSeconds
+	}
+}
 
-		ipLimitingCount, err := serverConf.Key("ipLimitingCount").Uint()
-		if err != nil || ipLimitingCount == 0 {
-			ipLimitingCount = 8
+func scanConfig(config interface{}) {
+	tp := reflect.TypeOf(config)
+	val := reflect.ValueOf(config)
+	if tp.Kind() == reflect.Ptr {
+		tp = tp.Elem()
+		val = val.Elem()
+	}
+	for i := 0; i < tp.NumField(); i++ {
+		fieldTp := tp.Field(i)
+		fieldVal := val.Field(i)
+		var tyKind reflect.Kind
+		if fieldTp.Type.Kind() == reflect.Ptr {
+			tyKind = fieldTp.Type.Elem().Kind()
 		}
-		appConf.serverConfig.IpLimitingCount = ipLimitingCount
-
-		liftIpLimiting, err := serverConf.Key("liftIpLimiting").Uint()
-		if err != nil || liftIpLimiting == 0 {
-			liftIpLimiting = 5
+		if tyKind == reflect.Struct {
+			scanConfig(fieldVal.Interface())
+		} else {
+			updateConfigValue(&fieldTp, &fieldVal)
 		}
-		appConf.serverConfig.LiftIpLimiting = liftIpLimiting
 	}
-
-	return
 }
 
-// 读取redis配置
-func readRedisConfig(iniFile *ini.File) (err error) {
-	redisConf := iniFile.Section("redis")
-
-	host := redisConf.Key("host").String()
-	if host == "" {
-		return errors.New("config file redis host can not be empty")
-	}
-	appConf.redisConfig.Host = host
-
-	port := redisConf.Key("port").String()
-	if port == "" {
-		port = "6379"
-	}
-	appConf.redisConfig.Port = port
-
-	password := redisConf.Key("password").String()
-	appConf.redisConfig.Password = password
-
-	return
-}
-
-// 读取mysql配置
-func readMysqlConfig(iniFile *ini.File) (err error) {
-	mysqlConf := iniFile.Section("mysql")
-
-	host := mysqlConf.Key("host").String()
-	if host == "" {
-		return errors.New("config file mysql host can not be empty")
-	}
-	appConf.mysqlConfig.Host = host
-
-	port := mysqlConf.Key("port").String()
-	if port == "" {
-		port = "3306"
-	}
-	appConf.mysqlConfig.Port = port
-
-	user := mysqlConf.Key("user").String()
-	if user == "" {
-		return errors.New("config file mysql connection user can not be empty")
-	}
-	appConf.mysqlConfig.User = user
-
-	password := mysqlConf.Key("password").String()
-	if password == "" {
-		return errors.New("config file mysql connection password can not be empty")
-	}
-	appConf.mysqlConfig.Password = password
-
-	db := mysqlConf.Key("db").String()
-	if db == "" {
-		return errors.New("config file mysql db name can not be empty")
-	}
-	appConf.mysqlConfig.DB = db
-
-	enableDebug, err := mysqlConf.Key("enableDebug").Bool()
-	if err != nil {
-		enableDebug = false
-	}
-	appConf.mysqlConfig.EnableDebug = enableDebug
-
-	return
-}
-
-// 读取email配置
-func readEmailConfig(iniFile *ini.File) (err error) {
-	emailConf := iniFile.Section("email")
-
-	recvMail := emailConf.Key("recverMail").String()
-	if recvMail != "" {
-		recvMailSlice := strings.Split(recvMail, ",")
-		appConf.emailConfig.RecvMail = recvMailSlice
-	}
-	smtpHost := emailConf.Key("smtpHost").String()
-	appConf.emailConfig.SmtpHost = smtpHost
-
-	smtpPort, _ := emailConf.Key("smtpPort").Int()
-	appConf.emailConfig.SmtpPort = smtpPort
-
-	senderMail := emailConf.Key("senderMail").String()
-	appConf.emailConfig.SenderMail = senderMail
-
-	senderAuthCode := emailConf.Key("senderAuthCode").String()
-	appConf.emailConfig.SenderAuthCode = senderAuthCode
-
-	return
-}
-
+/*
 // 读取proxy app配置
 func readProxyAppConfig(iniFile *ini.File) (err error) {
 	err = initRedisProxyPools()
@@ -332,6 +243,7 @@ func initRedisProxyPools() (err error) {
 	appConf.proxyPoolApp.RedisProxyPools = redisProxyPools
 	return
 }
+*/
 
 // ----------- 获取数据 ----------- //
 
@@ -346,8 +258,8 @@ func Get(ck string) interface{} {
 	if len(keys) == 0 {
 		return nil
 	}
-	appType := reflect.TypeOf(appConf)
-	appVal := reflect.ValueOf(appConf)
+	appType := reflect.TypeOf(AppConfig)
+	appVal := reflect.ValueOf(AppConfig)
 	for i := 0; i < appType.NumField(); i++ {
 		appTypeFiled := appType.Field(i)
 		regionTag := appTypeFiled.Tag.Get("conf")
@@ -384,7 +296,7 @@ func GetString(ck string) (val string) {
 	return
 }
 
-func GetInt(ck string) (int) {
+func GetInt(ck string) int {
 	value := Get(ck)
 	if value == nil {
 		return 0
@@ -398,7 +310,7 @@ func GetInt(ck string) (int) {
 	return 0
 }
 
-func GetBool(ck string) (bool) {
+func GetBool(ck string) bool {
 	value := Get(ck)
 	if value == nil {
 		return false
@@ -421,6 +333,6 @@ func GetStrings(ck string) (reslut []string) {
 	return
 }
 
-func GetRedisProxyPools() []*RedisProxyPool {
-	return appConf.proxyPoolApp.RedisProxyPools
-}
+//func GetRedisProxyPools() []*RedisProxyPool {
+//	return AppConfig.proxyPoolApp.RedisProxyPools
+//}
