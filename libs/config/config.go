@@ -3,99 +3,21 @@ package config
 import (
 	"apiTools/utils"
 	"fmt"
+	"github.com/go-ego/gse"
 	"gopkg.in/ini.v1"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
-	"time"
 )
-
-/*
-config struct tag说明:
-ini: 配置文件中名称，默认空则同名
-conf: 调用配置默认名称，否则以struct字段名第一个字母小写为准
-default: 配置默认值, 单字符串表示直接设置值，func:xxx表示调用函数设置值
-env: 优先读取环境变量中的值，默认读取struct字段名全大写值
-func: 调用获取值时返回的类型
-none: 标记字段为none时的值，后续扫描会判断
-panic: 当这个值为空时 panic错误消息提示
-*/
-
-// app configure
-type AppConfigInfo struct {
-	Service *serviceInfo `ini:"web" conf:"web"`
-	Redis   *redisInfo   `ini:"redis"`
-	Mysql   *mysqlInfo   `ini:"mysql"`
-	Email   *emailInfo   `ini:"email"`
-}
-
-// config file //
-
-// 服务配置信息
-type serviceInfo struct {
-	Port                  int    `default:"8091"`
-	AppMode               string `default:"development"`
-	EnablePprof           bool
-	LogLevel              string `default:"info"`
-	LogSaveDay            int    `default:"7"`
-	LogSplitTime          int    `default:"24"`
-	LogOutType            string `default:"json"`
-	LogOutPath            string `default:""`
-	StartTime             string `default:"func:startTime"`
-	EnableIpLimiting      bool
-	IpLimitingTimeSeconds int `default:"10"`
-	IpLimitingCount       int `default:"8"`
-	LiftIpLimiting        int `default:"5"`
-}
-
-// redis 配置信息
-type redisInfo struct {
-	Host     string
-	Port     int64 `default:"3306"`
-	Password string
-}
-
-// mysql 配置信息
-type mysqlInfo struct {
-	Host        string
-	Port        int `default:"3306"`
-	User        string
-	Password    string
-	DB          string
-	EnableDebug bool
-}
-
-// email 配置
-type emailInfo struct {
-	RecverMail     []string
-	SmtpHost       string
-	SmtpPort       int
-	SenderMail     string
-	SenderAuthCode string
-}
-
-// other config //
-
-// 代理池在redis中存储结构
-type RedisProxyPool struct {
-	KeyName  string `json:"keyName"`  // redis 键名称
-	CheckUrl string `json:"checkUrl"` // proxy 检测url名称
-}
-
-// proxy pool app配置信息
-type proxyPoolApp struct {
-	RedisProxyPools []*RedisProxyPool
-}
 
 var (
 	AppConfig *AppConfigInfo
-	//Seg       gse.Segmenter // 分词
-
-	defaultCallBack confCallBack
+	Seg       gse.Segmenter // 分词
 )
 
+/* init config */
 func InitConfig() (err error) {
 	AppConfig = &AppConfigInfo{}
 	// 获取配置文件
@@ -112,18 +34,8 @@ func InitConfig() (err error) {
 	scanConfig(AppConfig)
 
 	// 初始化分词功能, 加载默认字典
-	//_ = Seg.LoadDict()
+	_ = Seg.LoadDict()
 	return
-}
-
-type confCallBack struct{}
-
-func (*confCallBack) startTime(value string) time.Time {
-	if value == "" {
-
-	}
-	parse, _ := time.Parse("2006/01/02", value)
-	return parse
 }
 
 func setConfigValue(fieldType *reflect.StructField, fieldVal *reflect.Value, value interface{}) {
@@ -178,10 +90,14 @@ func updateConfigValue(fieldType *reflect.StructField, fieldVal *reflect.Value) 
 
 	if defaultValue != "" {
 		if defaultType == "func" {
-			callBack := reflect.ValueOf(defaultCallBack)
+			callBack := reflect.ValueOf(&defaultConfCallBack{})
 			callFunc := callBack.MethodByName(defaultValue)
-			callValue := callFunc.Call([]reflect.Value{})[0].Interface()
-			setConfigValue(fieldType, fieldVal, callValue)
+			args := []reflect.Value{reflect.ValueOf("xxx")}
+			callValue := callFunc.Call(args)
+			if len(callValue) > 0 {
+				callResultValue := callValue[0].String()
+				setConfigValue(fieldType, fieldVal, callResultValue)
+			}
 		} else {
 			setConfigValue(fieldType, fieldVal, defaultValue)
 		}
