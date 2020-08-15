@@ -18,8 +18,8 @@ var (
 func InitRedis() (err error) {
 	RedisPool = &redis.Pool{
 		Dial: func() (conn redis.Conn, err error) {
-			conn, err = redis.Dial("tcp", fmt.Sprintf("%s:%s",
-				config.GetString("redis::host"), config.GetString("redis::port")))
+			conn, err = redis.Dial("tcp", fmt.Sprintf("%s:%d",
+				config.GetString("redis::host"), config.GetInt("redis::port")))
 			if err != nil {
 				return nil, err
 			}
@@ -48,11 +48,11 @@ func InitMysql() (err error) {
 	// ALTER user 'apitools'@'localhost' IDENTIFIED BY 'apitools#.*'
 
 	db, err := gorm.Open("mysql",
-		fmt.Sprintf("%s:%s@(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
+		fmt.Sprintf("%s:%s@(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
 			config.GetString("mysql::user"),
 			config.GetString("mysql::password"),
 			config.GetString("mysql::host"),
-			config.GetString("mysql::port"),
+			config.GetInt("mysql::port"),
 			config.GetString("mysql::db"),
 		))
 	if err != nil {

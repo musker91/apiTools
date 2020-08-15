@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/robfig/cron/v3"
-	"gopkg.in/gomail.v2"
 	"io"
 	"math/rand"
 	"os"
@@ -130,34 +129,6 @@ func CreateToken() string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-// 发送邮件传递参数的结构体
-type SendMailStruct struct {
-	SendMail       string
-	RecvMail       []string
-	Subject        string
-	Body           string
-	SmtpHost       string
-	SmtpPort       int
-	SenderEmail    string
-	SenderAuthCode string
-}
-
-// 发送邮件
-func SendMail(sendMailStruct *SendMailStruct) (err error) {
-	mail := gomail.NewMessage()
-	mail.SetHeader("From", "<"+sendMailStruct.SendMail+">")        // 发送者
-	mail.SetHeader("To", sendMailStruct.RecvMail...)               // 接收者
-	mail.SetHeader("Subject", sendMailStruct.Subject)              //设置邮件主题
-	mail.SetBody("text/html", sendMailStruct.Body)                 //设置邮件正文
-	sendTo := gomail.NewDialer(sendMailStruct.SmtpHost, sendMailStruct.SmtpPort,
-		sendMailStruct.SenderEmail, sendMailStruct.SenderAuthCode) //创建发送链接
-
-	err = sendTo.DialAndSend(mail)
-	if err != nil {
-		return
-	}
-	return
-}
 
 // 正则匹配分组
 func RegexMatchGroup(compile string, s string) (result map[string]string, err error) {
@@ -216,4 +187,42 @@ func RandInt64(min, max int64) int64 {
 		return max
 	}
 	return rand.Int63n(max-min) + min
+}
+
+// 首写字母大写
+func Capitalize(str string) string {
+	var upperStr string
+	vv := []rune(str)
+	for i := 0; i < len(vv); i++ {
+		if i == 0 {
+			if vv[i] >=90 && vv[i] <= 122 {
+				vv[i] -= 32
+				upperStr += string(vv[i])
+			} else {
+				return str
+			}
+		} else {
+			upperStr += string(vv[i])
+		}
+	}
+	return upperStr
+}
+
+// 首写字母小写
+func LowerCase(str string) string {
+	var upperStr string
+	vv := []rune(str)
+	for i := 0; i < len(vv); i++ {
+		if i == 0 {
+			if vv[i] >= 65 && vv[i] <= 90 {
+				vv[i] += 32 // string的码表相差32位
+				upperStr += string(vv[i])
+			} else {
+				return str
+			}
+		} else {
+			upperStr += string(vv[i])
+		}
+	}
+	return upperStr
 }

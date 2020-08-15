@@ -34,7 +34,7 @@ func runHttpServer() (err error) {
 	routers.InitRouter()
 
 	// 启动服务
-	err = routers.Router.Run(fmt.Sprintf(":%s", config.GetString("web::port")))
+	err = routers.Router.Run(fmt.Sprintf(":%d", config.GetInt("web::port")))
 	if err != nil {
 		return
 	}

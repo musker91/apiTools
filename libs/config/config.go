@@ -2,18 +2,22 @@ package config
 
 import (
 	"apiTools/utils"
+	"encoding/json"
 	"fmt"
 	"github.com/go-ego/gse"
 	"gopkg.in/ini.v1"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 )
 
 var (
 	AppConfig *AppConfigInfo
+	iniFile   *ini.File
 	Seg       gse.Segmenter // 分词
 )
 
@@ -22,11 +26,15 @@ func InitConfig() (err error) {
 	AppConfig = &AppConfigInfo{}
 	// 获取配置文件
 	configPath := filepath.Join(utils.GetRootPath(), "config", "apitools.ini")
-	iniFile, err := ini.Load(configPath)
+	iniFile, err = ini.Load(configPath)
 	if err != nil {
 		return
 	}
 	err = iniFile.MapTo(AppConfig)
+	if err != nil {
+		return
+	}
+	err = initRedisProxyPools()
 	if err != nil {
 		return
 	}
@@ -55,7 +63,12 @@ func updateConfigValue(fieldType *reflect.StructField, fieldVal *reflect.Value) 
 	// env name
 	envName := fieldType.Tag.Get("env")
 	if envName == "" {
-		envName = strings.ToUpper(name)
+		reCompile := regexp.MustCompile("[A-Z]+[a-z0-9]+")
+		keySlice := reCompile.FindAllString(name, -1)
+		for i := 0; i < len(keySlice); i++ {
+			keySlice[i] = strings.ToUpper(keySlice[i])
+		}
+		envName = strings.Join(keySlice, "_")
 	}
 	// default value
 	defaultType := "" // "","func"
@@ -123,6 +136,10 @@ func scanConfig(config interface{}) {
 		fieldTp := tp.Field(i)
 		fieldVal := val.Field(i)
 		var tyKind reflect.Kind
+		passTag := fieldTp.Tag.Get("pass")
+		if passTag != "" {
+			continue
+		}
 		if fieldTp.Type.Kind() == reflect.Ptr {
 			tyKind = fieldTp.Type.Elem().Kind()
 		}
@@ -132,16 +149,6 @@ func scanConfig(config interface{}) {
 			updateConfigValue(&fieldTp, &fieldVal)
 		}
 	}
-}
-
-/*
-// 读取proxy app配置
-func readProxyAppConfig(iniFile *ini.File) (err error) {
-	err = initRedisProxyPools()
-	if err != nil {
-		return
-	}
-	return
 }
 
 // 初始化redis proxy ip 池配置
@@ -156,16 +163,56 @@ func initRedisProxyPools() (err error) {
 		err = fmt.Errorf("config parse redisProxyPools.json fail, err: %v", err)
 		return
 	}
-	appConf.proxyPoolApp.RedisProxyPools = redisProxyPools
+	AppConfig.proxyPoolApp.RedisProxyPools = redisProxyPools
 	return
 }
-*/
 
-// ----------- 获取数据 ----------- //
 
-// 获取指定字段值
+/* get config data */
+func readConfigVal(fileConfig *ini.File, keys []string) interface{} {
+	sectionStrings := fileConfig.SectionStrings()
+	isHas := utils.IsInSelic(keys[0], sectionStrings)
+	if !isHas {
+		return nil
+	}
+	section := fileConfig.Section(keys[0])
+	keyStrings := section.KeyStrings()
+	isHas = utils.IsInSelic(keys[1], keyStrings)
+	if !isHas {
+		return nil
+	}
+	value := section.Key(keys[1]).String()
+	return value
+}
+
+func parseConfig(config interface{}, key string) interface{} {
+	tp := reflect.TypeOf(config)
+	val := reflect.ValueOf(config)
+	if tp.Kind() == reflect.Ptr {
+		tp = tp.Elem()
+		val = val.Elem()
+	}
+	for i := 0; i < tp.NumField(); i++ {
+		fieldTp := tp.Field(i)
+		fieldVal := val.Field(i)
+		fieldConfName := fieldTp.Tag.Get("conf")
+		if fieldConfName == "" {
+			fieldConfName = utils.LowerCase(fieldTp.Name)
+		}
+		if key == fieldConfName {
+			funcTag := fieldTp.Tag.Get("func")
+			if funcTag != "" {
+
+			}
+			return fieldVal.Interface()
+		}
+	}
+	return nil
+}
+
+// get config field value
 // Get("web::port")
-// Get("appname")
+// Get("config")
 func Get(ck string) interface{} {
 	if ck == "" {
 		return nil
@@ -174,30 +221,20 @@ func Get(ck string) interface{} {
 	if len(keys) == 0 {
 		return nil
 	}
-	appType := reflect.TypeOf(AppConfig)
-	appVal := reflect.ValueOf(AppConfig)
-	for i := 0; i < appType.NumField(); i++ {
-		appTypeFiled := appType.Field(i)
-		regionTag := appTypeFiled.Tag.Get("conf")
-		if regionTag == keys[0] {
-			if len(keys) > 1 {
-				regionType := appVal.Field(i).Type()
-				regionVal := appVal.Field(i)
-				for j := 0; j < regionType.NumField(); j++ {
-					regionTypeFiled := regionType.Field(j)
-					confTag := regionTypeFiled.Tag.Get("conf")
-					if confTag == keys[1] {
-						val := regionVal.FieldByName(regionTypeFiled.Name).Interface()
-						return val
-					}
-				}
-			} else {
-				val := appVal.FieldByName(appTypeFiled.Name).Interface()
-				return val
-			}
+	var key string
+	var config interface{}
+	config = AppConfig
+	for i := 0; i < len(keys); i++ {
+		key = keys[i]
+		config = parseConfig(config, key)
+		if config == nil {
+			break
 		}
 	}
-	return nil
+	if config == nil && len(keys) == 2 {
+		config = readConfigVal(iniFile, keys)
+	}
+	return config
 }
 
 func GetString(ck string) (val string) {
@@ -217,13 +254,12 @@ func GetInt(ck string) int {
 	if value == nil {
 		return 0
 	}
-	if v01, ok01 := value.(uint); ok01 {
-		return int(v01)
+	valueTp := reflect.ValueOf(value).Kind().String()
+	isInt  := strings.Index(valueTp, "int")
+	if isInt == -1 {
+		return 0
 	}
-	if v02, ok02 := value.(int); ok02 {
-		return v02
-	}
-	return 0
+	return int(reflect.ValueOf(value).Int())
 }
 
 func GetBool(ck string) bool {
@@ -249,6 +285,6 @@ func GetStrings(ck string) (reslut []string) {
 	return
 }
 
-//func GetRedisProxyPools() []*RedisProxyPool {
-//	return AppConfig.proxyPoolApp.RedisProxyPools
-//}
+func GetRedisProxyPools() []*RedisProxyPool {
+	return AppConfig.proxyPoolApp.RedisProxyPools
+}

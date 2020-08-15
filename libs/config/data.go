@@ -9,10 +9,11 @@ config struct tag说明:
 ini: 配置文件中名称，默认空则同名
 conf: 调用配置默认名称，否则以struct字段名第一个字母小写为准
 default: 配置默认值, 单字符串表示直接设置值，func:xxx表示调用函数设置值
-env: 优先读取环境变量中的值，默认env设置名称与struct声明名称一致
+env: 优先读取环境变量中的值，默认env设置名称是struct field 以大写字母分割, 每个分割的单词全大写 以 _ 相连接
 func: 调用获取值时返回的类型
 none: 标记字段为none时的值，后续扫描会判断
 panic: 当这个值为空时 panic错误消息提示
+pass: 忽略初始化扫描
 */
 
 // app configure
@@ -21,6 +22,7 @@ type AppConfigInfo struct {
 	Redis   *redisInfo   `ini:"redis"`
 	Mysql   *mysqlInfo   `ini:"mysql"`
 	Email   *emailInfo   `ini:"email"`
+	proxyPoolApp proxyPoolApp `pass:"-"`
 }
 
 // config file //
@@ -55,7 +57,7 @@ type mysqlInfo struct {
 	Port        int    `default:"3306"  env:"MYSQL_PORT"`
 	User        string `panic:"mysql user not is empty"  env:"MYSQL_USER"`
 	Password    string `panic:"mysql password not is empty" env:"MYSQL_PASSWORD"`
-	DB          string `panic:"mysql db name not is empty" env:"MYSQL_DB"`
+	DB          string `panic:"mysql db name not is empty" env:"MYSQL_DB" conf:"db"`
 	EnableDebug bool
 }
 
