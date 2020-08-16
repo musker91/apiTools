@@ -158,7 +158,7 @@ func IpLimiting() gin.HandlerFunc {
 		if token != "" {
 			tokens, err := modles.GetTokensFromCache()
 			if err == nil {
-				if utils.IsInSelic(token, tokens) {
+				if utils.IsInSlice(token, tokens) {
 					c.Next()
 					return
 				} else {

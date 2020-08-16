@@ -91,7 +91,7 @@ func CreateUserVisit(userVisitAppli *UserVisitAppli) (err error) {
 	buf := new(bytes.Buffer)
 	t.Execute(buf, userVisitAppli)
 
-	sendMailStruct := &utils.SendMailStruct{
+	sendMailStruct := &utils.SendMailParams{
 		SendMail:       config.GetString("email::senderMail"),
 		RecvMail:       config.GetStrings("email::recvMail"),
 		Subject:        "ApiTools白名单申请",

@@ -12,7 +12,8 @@ default: 配置默认值, 单字符串表示直接设置值，func:xxx表示调�
 env: 优先读取环境变量中的值，默认env设置名称是struct field 以大写字母分割, 每个分割的单词全大写 以 _ 相连接
 func: 调用获取值时返回的类型
 none: 标记字段为none时的值，后续扫描会判断
-panic: 当这个值为空时 panic错误消息提示
+required: bool值，是否为必输入字段
+panic: 当required 为 true 时 这个值如果为空, panic提示的错误消息内容
 pass: 忽略初始化扫描
 */
 
@@ -37,7 +38,7 @@ type serviceInfo struct {
 	LogSplitTime          int    `default:"24"`
 	LogOutType            string `default:"json"`
 	LogOutPath            string `default:"file"`
-	StartTime             string `default:"func:StartTime"`
+	StartTime             string `default:"func:StartTime" func:"StartTime"`
 	EnableIpLimiting      bool
 	IpLimitingTimeSeconds int `default:"10"`
 	IpLimitingCount       int `default:"8"`
@@ -47,7 +48,7 @@ type serviceInfo struct {
 // redis 配置信息
 type redisInfo struct {
 	Host     string `panic:"redis host not is empty" env:"REDIS_HOST"`
-	Port     int64  `default:"3306" env:"REDIS_PORT"`
+	Port     int  `default:"6379" env:"REDIS_PORT"`
 	Password string `env:"REDIS_PASSWORD"`
 }
 
@@ -83,7 +84,7 @@ type proxyPoolApp struct {
 	RedisProxyPools []*RedisProxyPool
 }
 
-// 默认值设置，回调
+// 默认值设置，回调, 函数有且只有一个 value 参数, 可无参数, 函数名首写字母要大写
 type defaultConfCallBack struct{}
 
 func (*defaultConfCallBack) StartTime(value string) string {
@@ -94,9 +95,14 @@ func (*defaultConfCallBack) StartTime(value string) string {
 	return value
 }
 
-// 调用配置默认回调函数绑定
+// 调用配置默认回调函数绑定, 函数有且只有一个 value 参数, 可无参数, 函数名首写字母要大写
 type getConfigCallBack struct{}
 
+
 func (*getConfigCallBack) StartTime(value string) time.Time {
-	return time.Now()
+	runTime, err := time.Parse("2006/01/02", value)
+	if err != nil {
+		return time.Now()
+	}
+	return runTime
 }

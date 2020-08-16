@@ -29,8 +29,8 @@ func GetMD5(text string) string {
 	h := md5.New()
 	salt := "apiTools"
 	io.WriteString(h, text+salt)
-	urlmd5 := fmt.Sprintf("%x", h.Sum(nil))
-	return urlmd5
+	urlMd5 := fmt.Sprintf("%x", h.Sum(nil))
+	return urlMd5
 }
 
 // 获取随机的唯一短串
@@ -92,7 +92,7 @@ func TimerUtil(second int64) {
 }
 
 // 判断值是否在一个切片中存在
-func IsInSelic(data string, slice []string) bool {
+func IsInSlice(data string, slice []string) bool {
 	for _, s := range slice {
 		if s == data {
 			return true

@@ -54,6 +54,9 @@ func setConfigValue(fieldType *reflect.StructField, fieldVal *reflect.Value, val
 	case reflect.Int:
 		v, _ := strconv.Atoi(confValue)
 		fieldVal.SetInt(int64(v))
+	case reflect.Bool:
+		v, _ := strconv.ParseBool(confValue)
+		fieldVal.SetBool(v)
 	}
 }
 
@@ -105,7 +108,11 @@ func updateConfigValue(fieldType *reflect.StructField, fieldVal *reflect.Value) 
 		if defaultType == "func" {
 			callBack := reflect.ValueOf(&defaultConfCallBack{})
 			callFunc := callBack.MethodByName(defaultValue)
-			args := []reflect.Value{reflect.ValueOf("xxx")}
+			funcParamsLen := callFunc.Type().NumIn()
+			var args []reflect.Value
+			if funcParamsLen == 1 {
+				args = append(args, reflect.ValueOf(newVal))
+			}
 			callValue := callFunc.Call(args)
 			if len(callValue) > 0 {
 				callResultValue := callValue[0].String()
@@ -115,12 +122,17 @@ func updateConfigValue(fieldType *reflect.StructField, fieldVal *reflect.Value) 
 			setConfigValue(fieldType, fieldVal, defaultValue)
 		}
 	}
-	// error panic
-	panicValue := fieldType.Tag.Get("panic")
-	if panicValue != "" {
-		if fieldVal.String() == "" && defaultValue == "" && envValue == "" {
 
-			panic(panicValue)
+	// error panic
+	isRequired := fieldType.Tag.Get("required")
+	if isRequired == "true" {
+		if fieldVal.String() == "" && defaultValue == "" && envValue == "" {
+			panicValue := fieldType.Tag.Get("panic")
+			if panicValue != "" {
+				panic(panicValue)
+			} else {
+				panic(fmt.Sprintf("%s is required field!!!", name))
+			}
 		}
 	}
 }
@@ -171,17 +183,17 @@ func initRedisProxyPools() (err error) {
 /* get config data */
 func readConfigVal(fileConfig *ini.File, keys []string) interface{} {
 	sectionStrings := fileConfig.SectionStrings()
-	isHas := utils.IsInSelic(keys[0], sectionStrings)
+	isHas := utils.IsInSlice(keys[0], sectionStrings)
 	if !isHas {
 		return nil
 	}
 	section := fileConfig.Section(keys[0])
 	keyStrings := section.KeyStrings()
-	isHas = utils.IsInSelic(keys[1], keyStrings)
+	isHas = utils.IsInSlice(keys[1], keyStrings)
 	if !isHas {
 		return nil
 	}
-	value := section.Key(keys[1]).String()
+	value := section.Key(keys[1])
 	return value
 }
 
@@ -200,9 +212,19 @@ func parseConfig(config interface{}, key string) interface{} {
 			fieldConfName = utils.LowerCase(fieldTp.Name)
 		}
 		if key == fieldConfName {
-			funcTag := fieldTp.Tag.Get("func")
-			if funcTag != "" {
-
+			funcValue := fieldTp.Tag.Get("func")
+			if funcValue != "" {
+				callBack := reflect.ValueOf(&getConfigCallBack{})
+				callFunc := callBack.MethodByName(funcValue)
+				funcParamsLen := callFunc.Type().NumIn()
+				var args []reflect.Value
+				if funcParamsLen == 1 {
+					args = append(args, reflect.ValueOf(fieldVal.Interface()))
+				}
+				callValue := callFunc.Call(args)
+				if len(callValue) > 0 {
+					return callValue[0].Interface()
+				}
 			}
 			return fieldVal.Interface()
 		}

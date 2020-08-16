@@ -74,7 +74,7 @@ func QueryProxyPoolInfo(proxyPoolForm *ProxyPoolForm) (proxyPoolResult *ProxyPoo
 	if proxyPoolForm.Protocol != "" {
 		proxyPoolForm.Protocol = strings.ToLower(proxyPoolForm.Protocol)
 		protocolSlice := []string{"http", "https"}
-		isIn := utils.IsInSelic(proxyPoolForm.Protocol, protocolSlice)
+		isIn := utils.IsInSlice(proxyPoolForm.Protocol, protocolSlice)
 		if !isIn {
 			err = errors.New("protocol parameter passed incorrectly")
 			return
@@ -84,7 +84,7 @@ func QueryProxyPoolInfo(proxyPoolForm *ProxyPoolForm) (proxyPoolResult *ProxyPoo
 	}
 	if proxyPoolForm.Anonymity != "" {
 		anonymitySlice := []string{"透明", "高匿"}
-		isIn := utils.IsInSelic(proxyPoolForm.Anonymity, anonymitySlice)
+		isIn := utils.IsInSlice(proxyPoolForm.Anonymity, anonymitySlice)
 		if !isIn {
 			err = errors.New("anonymity parameter passed incorrectly")
 			return
@@ -103,7 +103,7 @@ func QueryProxyPoolInfo(proxyPoolForm *ProxyPoolForm) (proxyPoolResult *ProxyPoo
 	}
 	if proxyPoolForm.OrderBy != "" {
 		orderBySlice := []string{"speed", "verify_time"}
-		isIn := utils.IsInSelic(proxyPoolForm.OrderBy, orderBySlice)
+		isIn := utils.IsInSlice(proxyPoolForm.OrderBy, orderBySlice)
 		if !isIn {
 			err = errors.New("order_by parameter passed incorrectly")
 			return
@@ -112,7 +112,7 @@ func QueryProxyPoolInfo(proxyPoolForm *ProxyPoolForm) (proxyPoolResult *ProxyPoo
 			proxyPoolForm.OrderRule = "asc"
 		} else {
 			orderRuleSlice := []string{"desc", "asc"}
-			isIn := utils.IsInSelic(proxyPoolForm.OrderRule, orderRuleSlice)
+			isIn := utils.IsInSlice(proxyPoolForm.OrderRule, orderRuleSlice)
 			if !isIn {
 				err = errors.New("order_rule parameter passed incorrectly")
 				return

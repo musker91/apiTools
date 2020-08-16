@@ -43,7 +43,7 @@ func parseCommand() bool {
 		return false
 	}
 
-	if !utils.IsInSelic(commandSlice[2], commandList) {
+	if !utils.IsInSlice(commandSlice[2], commandList) {
 		commandHelp()
 		return false
 	}
