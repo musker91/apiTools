@@ -11,6 +11,11 @@ pack:
 	@bash ./build.sh
 	@echo "packaged successfully"
 
+pack-linux-amd64:
+	@GOOS=linux GOARCH=amd64 go build -v .
+	@bash ./build.sh
+	@echo "packaged successfully"
+
 tool:
 	@go vet .
 	@gofmt -w .

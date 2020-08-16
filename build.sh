@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # create dist directory
-if [[ -d "./dist" || -f "./dist.zip" ]]; then
-    rm -rf ./dist ./dist.zip   
+if [[ -d "./dist" || -f "./dist.tar.gz" ]]; then
+    rm -rf ./dist ./dist.tar.gz
 fi
 
 mkdir ./dist
@@ -18,7 +18,7 @@ cp -rf views    ./dist/
 mkdir ./dist/logs/
 
 # compression program
-zip -r dist.zip ./dist
+tar zcf dist.tar.gz ./dist
 
 # remove dist directory
 rm -rf ./dist

@@ -10,7 +10,7 @@ Test*
 # dev file
 run_apiTools
 apiTools
-dist.zip
+dist.*
 
 # Editor directories and files
 .idea
