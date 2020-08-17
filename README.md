@@ -48,7 +48,15 @@ $ make pack-linux-amd64
 3) 构建docker image
 $ export apiTools_version=0.1
 $ docker build -t apitools:$apiTools_version .
+
+4) help
+$ docker run -it --rm apitools:$apiTools_version help
+
+5) run
+$ docker run -d  -p 8081:8081 --env-file config.env --name apiTools apitools:$apiTools_version
+
 ```
+
 
 ---
 官网地址: [https://api.devopsclub.cn](https://api.devopsclub.cn)

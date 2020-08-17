@@ -19,10 +19,10 @@ pass: 忽略初始化扫描
 
 // app configure
 type AppConfigInfo struct {
-	Service *serviceInfo `ini:"web" conf:"web"`
-	Redis   *redisInfo   `ini:"redis"`
-	Mysql   *mysqlInfo   `ini:"mysql"`
-	Email   *emailInfo   `ini:"email"`
+	Service      *serviceInfo `ini:"web" conf:"web"`
+	Redis        *redisInfo   `ini:"redis"`
+	Mysql        *mysqlInfo   `ini:"mysql"`
+	Email        *emailInfo   `ini:"email"`
 	proxyPoolApp proxyPoolApp `pass:"-"`
 }
 
@@ -37,7 +37,7 @@ type serviceInfo struct {
 	LogSaveDay            int    `default:"7"`
 	LogSplitTime          int    `default:"24"`
 	LogOutType            string `default:"json"`
-	LogOutPath            string `default:"file"`
+	LogOutPath            string `default:"console"`
 	StartTime             string `default:"func:StartTime" func:"StartTime"`
 	EnableIpLimiting      bool
 	IpLimitingTimeSeconds int `default:"10"`
@@ -48,7 +48,7 @@ type serviceInfo struct {
 // redis 配置信息
 type redisInfo struct {
 	Host     string `panic:"redis host not is empty" env:"REDIS_HOST"`
-	Port     int  `default:"6379" env:"REDIS_PORT"`
+	Port     int    `default:"6379" env:"REDIS_PORT"`
 	Password string `env:"REDIS_PASSWORD"`
 }
 
@@ -97,7 +97,6 @@ func (*defaultConfCallBack) StartTime(value string) string {
 
 // 调用配置默认回调函数绑定, 函数有且只有一个 value 参数, 可无参数, 函数名首写字母要大写
 type getConfigCallBack struct{}
-
 
 func (*getConfigCallBack) StartTime(value string) time.Time {
 	runTime, err := time.Parse("2006/01/02", value)

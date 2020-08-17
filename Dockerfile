@@ -8,7 +8,6 @@ ADD dist.tar.gz .
 
 RUN mv dist/* . && rm -rf dist && chmod +x apiTools
 
-EXPOSE 8091
 
 ENTRYPOINT ["./apiTools", "run"]
 
