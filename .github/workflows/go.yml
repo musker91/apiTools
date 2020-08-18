@@ -1,33 +1,37 @@
-# This is a basic workflow to help you get started with Actions
+# build apiTools
 
-name: CI
+name: apiTools
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    tags:
+    - v*
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
+
   build:
-    # The type of runner that the job will run on
+    name: Build
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
-
-    # Runs a single command using the runners shell
-    - name: Run a one-line script
-      run: echo Hello, world!
-
-    # Runs a set of commands using the runners shell
-    - name: Run a multi-line script
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
+      - name: Set up Go 1.13
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+        id: go
+      - name: Go env
       run: |
-        echo Add other actions to build,
-        echo test, and deploy your project.
+        echo "::set-env name=GOPATH::$(go env GOPATH)"
+        echo "::add-path::$(go env GOPATH)/bin"
+      - uses: actions/checkout@v1 # without submodules
+      - name: Tell git to use https instead of ssh whenever it encounters it
+        run: 'git config --global url."https://github.com/".insteadof git@github.com:'
+      - name: Build
+        run: make pack-linux-amd64
+      - name: Upload to aliyun
+        run: |
+          docker login --username=${{ secrets.ALI_REPO_USER }} --password=${{ secrets.ALI_REPO_PASSWORD }} registry.cn-beijing.aliyuncs.com
+          docker build -t registry.cn-beijing.aliyuncs.com/musker/apitools:${{ steps.get_version.outputs.VERSION }} .
+          docker push registry.cn-beijing.aliyuncs.com/musker/apitools:${{ steps.get_version.outputs.VERSION }}
