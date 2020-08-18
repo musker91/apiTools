@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM ubuntu:latest
 
 LABEL maintainer="Musker.Chao <aery_mzc9123@163.com>"
 
