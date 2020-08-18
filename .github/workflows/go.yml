@@ -22,9 +22,9 @@ jobs:
           go-version: 1.13
         id: go
       - name: Go env
-      run: |
-        echo "::set-env name=GOPATH::$(go env GOPATH)"
-        echo "::add-path::$(go env GOPATH)/bin"
+        run: |
+          echo "::set-env name=GOPATH::$(go env GOPATH)"
+          echo "::add-path::$(go env GOPATH)/bin"
       - uses: actions/checkout@v1 # without submodules
       - name: Tell git to use https instead of ssh whenever it encounters it
         run: 'git config --global url."https://github.com/".insteadof git@github.com:'
