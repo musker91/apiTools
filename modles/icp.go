@@ -93,27 +93,27 @@ func parseIcpData(data []byte) (icpResponse *ICPResponse, status bool, err error
 	icpResponse = &ICPResponse{
 		OrganizerName: func() string {
 			textBody := htmlquery.InnerText(htmlquery.FindOne(ulNode[0], "/p"))
-			return strings.Trim(textBody, "使用高级查询纠正信息")
+			return strings.TrimSpace(strings.Trim(textBody, "使用高级查询纠正信息"))
 		}(),
 		OrganizerNature: func() string {
 			textBody := htmlquery.InnerText(htmlquery.FindOne(ulNode[1], "/p"))
-			return textBody
+			return strings.TrimSpace(textBody)
 		}(),
 		RecordingLicenseNumber: func() string {
 			textBody := htmlquery.InnerText(htmlquery.FindOne(ulNode[2], "/p"))
-			return strings.Trim(textBody, "查看截图")
+			return strings.TrimSpace(strings.Trim(textBody, "查看截图"))
 		}(),
 		SiteName: func() string {
 			textBody := htmlquery.InnerText(htmlquery.FindOne(ulNode[3], "/p"))
-			return textBody
+			return strings.TrimSpace(textBody)
 		}(),
 		SiteIndexUrl: func() string {
 			textBody := htmlquery.InnerText(htmlquery.FindOne(ulNode[5], "/p"))
-			return textBody
+			return strings.TrimSpace(textBody)
 		}(),
 		ReviewTime: func() string {
 			textBody := htmlquery.InnerText(htmlquery.FindOne(ulNode[7], "/p"))
-			return textBody
+			return strings.TrimSpace(textBody)
 		}(),
 	}
 	status = true

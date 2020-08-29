@@ -36,7 +36,7 @@ func WhoisQuery(c *gin.Context) {
 				"routers": c.Request.URL.Path,
 				"err":    err,
 				"query":  whoisForm,
-				"data":   whoisInfo,
+				//"data":   whoisInfo,
 			}).Error("query whois info fail")
 			return
 		}
@@ -51,7 +51,7 @@ func WhoisQuery(c *gin.Context) {
 				"routers": c.Request.URL.Path,
 				"err":    err,
 				"query":  whoisForm,
-				"data":   whoisInfo,
+				//"data":   whoisInfo,
 			}).Error("query whois info fail")
 			return
 		}
