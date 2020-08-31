@@ -148,6 +148,16 @@ func ProApiDocs() gin.HandlerFunc {
 // api接口访问限流
 func IpLimiting() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		urlPath := c.Request.URL.Path
+		urlPathSlice := strings.Split(urlPath, "/")
+		var rk string
+		if len(urlPathSlice) >= 2 {
+			rk = urlPathSlice[1]
+		}
+		if rk != "api" {
+			c.Next()
+			return
+		}
 		accessDenied := gin.H{
 			"code": 1,
 			"data": gin.H{},
@@ -181,19 +191,8 @@ func IpLimiting() gin.HandlerFunc {
 			if count == ipLimitingCount {
 				_, _ = redisClient.Do("SET", clientIp, "999", "EX", liftIpLimiting)
 			}
-			urlpath := c.Request.URL.Path
-			urlPathSlice := strings.Split(urlpath, "/")
-			if len(urlPathSlice) >= 2 {
-				rk := urlPathSlice[1]
-				if rk == "api" {
-					c.JSON(http.StatusForbidden, accessDenied)
-					c.Abort()
-					return
-				}
-			}
-			c.HTML(http.StatusForbidden, "error.html", gin.H{"errorCode": "403", "errorMsg": "访问过于频繁，权限被拒绝"})
+			c.JSON(http.StatusForbidden, accessDenied)
 			c.Abort()
-			return
 		} else {
 			if count == 0 {
 				_, _ = redisClient.Do("SET", clientIp, 1, "EX", ipLimitingTimeSeconds)
@@ -201,5 +200,6 @@ func IpLimiting() gin.HandlerFunc {
 				_, _ = redisClient.Do("INCR", clientIp)
 			}
 		}
+		c.Next()
 	}
 }
