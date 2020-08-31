@@ -31,9 +31,16 @@ func InitRedis() (err error) {
 			}
 			return
 		},
-		MaxIdle:     16,              // 最大空闲连接数
-		MaxActive:   32,              // 最大活跃连接数
-		IdleTimeout: time.Second * 3, // 最大空闲超时时间
+		TestOnBorrow: func(c redis.Conn, t time.Time) error {
+			if time.Since(t) < time.Minute {
+				return nil
+			}
+			_, err := c.Do("PING")
+			return err
+		},
+		MaxIdle:     100,              // 最大空闲连接数
+		MaxActive:   4000,              // 最大活跃连接数
+		IdleTimeout: time.Second * 3600, // 最大空闲超时时间
 	}
 	pool := RedisPool.Get()
 	defer pool.Close()
